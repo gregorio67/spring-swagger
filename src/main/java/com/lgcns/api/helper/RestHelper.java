@@ -1,0 +1,104 @@
+/**
+ * @Project : 병행검증 솔루션
+ * @Class : RestHelper.java
+ * @Description :
+ * @Author : kimdoy
+ * @Since : Mar 26, 2020
+ * @Copyright LG CNS
+ *------------------------------------------------------
+ *      Dodification Information
+ *------------------------------------------------------
+ *  Date        Modifier       Reason
+ *------------------------------------------------------
+ *  Mar 26, 2020     kimdoy         Initial
+ *------------------------------------------------------
+ */
+package com.lgcns.api.helper;
+
+import java.util.Arrays;
+import java.util.Properties;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.retry.RetryCallback;
+import org.springframework.retry.RetryContext;
+import org.springframework.retry.support.RetryTemplate;
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestTemplate;
+
+
+public class RestHelper {
+	private static final Logger LOGGER = LoggerFactory.getLogger(RestHelper.class);
+
+	/**
+	 * Call rest service with rest template and default media type is JSON
+	 * @param url
+	 * @param param
+	 * @param target
+	 * @return
+	 * @throws Exception
+	 */
+	public static <T, V> V exchange(String url, T param, Class<V> target) throws Exception {
+		return exchange(url, param, target, MediaType.APPLICATION_JSON);
+	}
+	
+	/**
+	 * Call rest service with rest template and media type
+	 * @param url
+	 * @param param
+	 * @param target
+	 * @param mediaType
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T, V> V exchange(String url, T param, Class<V> target, MediaType mediaType) throws Exception {
+
+		Properties system = BeanHelper.getBean("system");
+		final int maxRetry = Integer.parseInt((String)system.get("http.max.retry.count"));
+
+		/** Create Request headers **/
+		HttpHeaders requestHeaders = new HttpHeaders();
+		requestHeaders.add("Accept", mediaType.getType());
+		requestHeaders.setAccept(Arrays.asList(mediaType));
+
+		final HttpEntity<?> requestEntity = new HttpEntity<>(param, requestHeaders);
+
+		final RestTemplate restTemplate = BeanHelper.getBean("restTemplate");
+		
+		/** Rest retry **/
+		RetryTemplate retryTemplate = BeanHelper.getBean("retryTemplate");
+		ResponseEntity<?> responseEntity = retryTemplate.execute(new RetryCallback<ResponseEntity<?>, Exception>() {
+
+			@Override
+			public ResponseEntity<?> doWithRetry(RetryContext context) throws Exception {
+
+				ResponseEntity<?> responseEntity = null;
+				try {
+					responseEntity = restTemplate.exchange(url, HttpMethod.POST, requestEntity, target);
+				}
+				catch(Exception ex) {
+					String errmsg = String.format("Retry to call service :: [%s]] [%d]/[%d] times", url, context.getRetryCount() + 1, maxRetry);
+					LOGGER.error("ERROR :: {}", errmsg);
+					throw new ResourceAccessException(errmsg);
+				}
+				return responseEntity;
+			}
+		});
+
+		if (responseEntity.getStatusCode() == HttpStatus.OK) {
+			if (responseEntity.getBody() == null) {
+				return null;
+			}
+			return (V) responseEntity.getBody();
+		} else {
+			return null;
+		}
+	}
+}

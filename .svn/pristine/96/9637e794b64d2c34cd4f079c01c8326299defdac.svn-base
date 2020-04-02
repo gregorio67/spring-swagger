@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<beans xmlns="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+    					http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+    
+
+	<bean id="httpClientFactory" class="com.lgcns.api.http.HttpClientFactory">
+		<property name="ssl" value="#{system['http.ssl.use']}" />
+		<property name="maxPool" value="#{system['http.max.pool']}" />
+		<property name="connectTimeout" value="#{system['http.connect.timeout']}" />
+		<property name="readTimeout" value="#{system['http.read.timeout']}" />
+		<property name="maxRetry" value="#{system['http.max.retry.count']}" />
+	</bean>
+	
+	<bean id="httpComponentClientFactory" class="org.springframework.http.client.HttpComponentsClientHttpRequestFactory">
+		<constructor-arg ref="httpClientFactory" />
+	</bean>
+		
+	<bean id="restTemplate" class="org.springframework.web.client.RestTemplate">
+		<constructor-arg ref="httpComponentClientFactory" />
+		<property name="messageConverters">
+			<list>
+				<bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter" />
+				<bean class="org.springframework.http.converter.FormHttpMessageConverter" />
+				<bean class="org.springframework.http.converter.StringHttpMessageConverter" />
+			</list>
+		</property>
+	</bean>
+</beans>

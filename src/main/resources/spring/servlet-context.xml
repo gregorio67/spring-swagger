@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:p="http://www.springframework.org/schema/p"
+        xmlns:context="http://www.springframework.org/schema/context"
+        xmlns:mvc="http://www.springframework.org/schema/mvc"
+        xmlns:aop="http://www.springframework.org/schema/aop"
+        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+                 http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <context:component-scan base-package="com.lgcns.swagger, com.lgcns.api">
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Service"/>
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Repository"/>
+    </context:component-scan>
+
+	<!-- swagger resources SwaggerConfig setting -->
+	<!-- mvc:resources mapping="/webjars/**" location="classpath:/META-INF/resources/webjars/"/>
+    <mvc:resources mapping="/swagger-ui.html" location="classpath:/META-INF/resources/swagger-ui.html"/-->
+     
+
+	<!-- mvc:resources order="1" mapping="/resources/**" location="/resources"  /-->
+	<mvc:resources  mapping="/js/**" location="/js/"/>
+	<mvc:resources  mapping="/css/**" location="/css/"/>	
+	
+	
+    <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+        <!-- property name="webBindingInitializer">
+            <bean class="com.lgcns.perfectwin.web.EgovBindingInitializer"/>
+        </property-->
+        <!-- property name="customArgumentResolvers">
+        	<list>
+        		<ref bean="sessionArgumenmtResolver" />
+        		<ref bean="annotationArgumentResolver" />
+        	</list>
+        </property-->
+        <property name="messageConverters">
+        	<list>
+                <ref bean="jsonMessageConverter" />
+                <ref bean="byteMessageConverter" />
+                <ref bean="xmlMessageConverter" />
+                <!-- For Sever sent event -->
+                <ref bean="stringMessageConverter" />
+        	</list>
+        </property>
+    </bean>
+    <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping">
+        <property name="interceptors">
+            <list>
+                <ref bean="localeChangeInterceptor" />
+            </list>
+        </property>
+        <property name="alwaysUseFullPath" value="true" />
+    </bean>
+    
+    
+
+    
+    <bean id="localeResolver" class="org.springframework.web.servlet.i18n.SessionLocaleResolver">
+    	<property name="defaultLocale" value="ko" />
+    </bean>
+    <!-- 쿠키를 이용한 Locale 이용시 <bean id="localeResolver" class="org.springframework.web.servlet.i18n.CookieLocaleResolver"/> -->
+    <bean id="localeChangeInterceptor" class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor">
+        <property name="paramName" value="lang" />
+    </bean>
+	
+	
+	<!-- JSON message Converter  -->
+	<bean id="jsonMessageConverter" class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+		<property name="supportedMediaTypes">
+			<list>
+				<value>application/json;charset=UTF-8</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="byteMessageConverter" class="org.springframework.http.converter.ByteArrayHttpMessageConverter">
+		<property name="supportedMediaTypes">
+			<list>
+				<value>image/jpge</value>
+				<value>image/png</value>
+			</list>
+		</property>
+	</bean>
+	
+	<bean id="stringMessageConverter" class="org.springframework.http.converter.StringHttpMessageConverter" />
+	
+	<bean id="xmlMessageConverter" class="org.springframework.http.converter.xml.MarshallingHttpMessageConverter">
+		<property name="marshaller" ref="xmlStreamMarshaller" />
+		<property name="unmarshaller" ref="xmlStreamMarshaller" />
+	</bean>
+	<bean id="xmlStreamMarshaller" class="org.springframework.oxm.xstream.XStreamMarshaller" />
+	
+	
+    <!-- bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+        <property name="defaultErrorView" value="cmmn/egovError"/>
+        <property name="exceptionMappings">
+            <props>
+                <prop key="org.springframework.dao.DataAccessException">cmmn/dataAccessFailure</prop>
+                <prop key="org.springframework.transaction.TransactionException">cmmn/transactionFailure</prop>
+                <prop key="egovframework.rte.fdl.cmmn.exception.EgovBizException">cmmn/egovError</prop>
+                <prop key="org.springframework.security.AccessDeniedException">cmmn/egovError</prop>
+            </props>
+        </property>
+    </bean-->
+
+	<bean id="contentNegotitatingViewResolver" class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+		<property name="defaultViews">
+			<list>
+				<ref bean="jsonView" />
+			</list>
+		</property>
+		<property name="viewResolvers">
+			<list>
+				<bean class="org.springframework.web.servlet.view.BeanNameViewResolver" />
+			    <ref bean="urlBasedViewResolver" />				
+			</list>
+		</property>
+	</bean>
+
+    <bean id="urlBasedViewResolver" class="org.springframework.web.servlet.view.UrlBasedViewResolver">
+    	<property name="order" value="1" />
+    	<property name="viewClass" value="org.springframework.web.servlet.view.JstlView" />
+    	<property name="prefix" value="/WEB-INF/jsp/perfectwin/example/" />
+    	<property name="suffix" value=".jsp" />
+	</bean>
+	
+    
+	<!-- /For Pagination Tag -->
+
+    <mvc:view-controller path="/cmmn/validator.do" view-name="cmmn/validator"/>
+    
+    <bean id="jsonView" class="org.springframework.web.servlet.view.json.MappingJackson2JsonView" />
+
+	
+	<import resource="classpath:/spring/context-swagger.xml" />
+</beans>

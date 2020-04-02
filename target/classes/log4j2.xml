@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- configuration status="warn" monitorInterval="30"-->
+<configuration status="warn">
+	<properties>
+		<property name="LOG_DIR">D:/temp/logs/swagger</property>
+		<property name="APP_LOG">app</property>
+		<property name="SYS_LOG">sys</property>
+		<property name="SQL_LOG">sql</property>
+		<property name="pattern">%d{HH:mm:ss.SSS} [%thread] %-5level %logger{50}.%M\(%line\) | %msg%n</property>	
+	</properties>
+	<Appenders>
+		<Console name="Console" target="SYSTEM_OUT">
+			<PatternLayout>
+				<pattern>${pattern}</pattern>
+			</PatternLayout>
+		</Console>
+		<Console name="sql-Console" target="SYSTEM_OUT">
+			<PatternLayout>
+				<pattern>${pattern}</pattern>
+			</PatternLayout>
+		</Console>
+		<RollingFile name="appFile" fileName="${LOG_DIR}/${APP_LOG}.log"
+				 filePattern="${LOG_DIR}/$${date:yyyy-MM}/${APP_LOG}-%d{yyyy-MM-dd}-%i.log.gz">
+			<PatternLayout>
+				<pattern>${pattern}</pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy /><!-- Rotated everyday -->
+				<SizeBasedTriggeringPolicy size="100MB"/> <!-- Or every 100 MB -->
+			</Policies>
+		</RollingFile>
+		<RollingFile name="sysFile" fileName="${LOG_DIR}/${SYS_LOG}.log"
+				 filePattern="${LOG_DIR}/$${date:yyyy-MM}/${SYS_LOG}-%d{yyyy-MM-dd}-%i.log.gz">
+			<PatternLayout>
+				<pattern>${pattern}</pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy /><!-- Rotated everyday -->
+				<SizeBasedTriggeringPolicy size="100MB"/> <!-- Or every 100 MB -->
+			</Policies>
+		</RollingFile>
+		<RollingFile name="sqlFile" fileName="${LOG_DIR}/${SQL_LOG}.log"
+				 filePattern="${LOG_DIR}/$${date:yyyy-MM}/${SQL_LOG}-%d{yyyy-MM-dd}-%i.log.gz">
+			<PatternLayout>
+				<pattern>${pattern}</pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy /><!-- Rotated everyday -->
+				<SizeBasedTriggeringPolicy size="100MB"/> <!-- Or every 100 MB -->
+			</Policies>
+		</RollingFile>
+		<!-- Set Async Log  -->
+		<!-- Async name="ASYNC">
+			<AppenderRef ref="TEMP"/>
+			<AppenderRef ref="CONSOLE"/>
+		</Async-->	
+	</Appenders>
+	
+	<Loggers>
+		<!-- Application Log -->
+		<Logger name="com.lgcns.api" level="debug" additivity="false">
+			<AppenderRef ref="Console" />
+			<AppenderRef ref="appFile" />
+		</Logger>
+
+		<!-- eGovFrame logging level -->
+		<Logger name="egovframework" level="info" additivity="false">
+			<AppenderRef ref="Console" />
+			<AppenderRef ref="sysFile" />
+		</Logger>		
+
+		<!-- SpringFramework Log -->
+		<Logger name="org.springframework" level="info" additivity="false">
+			<AppenderRef ref="Console" />
+			<AppenderRef ref="sysFile" />
+		</Logger>
+
+		<!-- MyBatis logging level -->
+		<Logger name="org.mybatis" level="info" additivity="false">
+			<AppenderRef ref="sql-Console" />
+ 			<AppenderRef ref="sysFile" />
+		</Logger>
+		
+		<Logger name="log4jdbc.log4j2" level="error" additivity="false">
+		 	<MarkerFilter marker="LOG4JDBC_OTHER" onMatch="DENY" onMismatch="NEUTRAL"/>
+		  	<AppenderRef ref="sql-Console" />
+			<AppenderRef ref="sqlFile" />
+		</Logger>
+		
+		<!-- SQL LOG -->
+		<!-- <Logger name="java.sql" level="debug" additivity="false">
+			<AppenderRef ref="sql-Console" />
+			<AppenderRef ref="sysFile" />
+		</Logger>
+			
+		JDBC SQL Query Print logging level
+		<Logger name="jdbc.resultsettable" level="debug" additivity="false"> SQL 조회 결과를 확인하고 싶을 경우는 DEBUG로 수정
+			<AppenderRef ref="sql-Console" />
+			<AppenderRef ref="sqlFile" />
+		</Logger>
+		
+		JDBC SQL Query Print logging level
+		<Logger name="jdbc.sqlonly" level="debug" additivity="false">
+			<AppenderRef ref="sql-Console" />
+			<AppenderRef ref="sqlFile" />
+		</Logger> -->
+
+		<ROOT level="error">
+			<AppenderRef ref="Console" />
+			<AppenderRef ref="appFile" />
+		</ROOT>
+	</Loggers>
+<typeAliases></typeAliases>
+</configuration>

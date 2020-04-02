@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<beans xmlns="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xmlns:util="http://www.springframework.org/schema/util"
+    xmlns:date="http://cmn.authoring.date/schema/date"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+    					http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+    					http://cmn.authoring.date/schema/date http://cmn.authoring.date/schema/date/dateformat.xsd">
+    
+    
+    <bean id="fixedBackOffPolicy" class="org.springframework.retry.backoff.FixedBackOffPolicy">
+    	<property name="backOffPeriod" value="#{system['http.retry.sleep']}" />
+    </bean>
+    
+    <bean id="retryPolicy" class="org.springframework.retry.policy.SimpleRetryPolicy">
+    	<constructor-arg index="0" value="#{system['http.max.retry.count']}" />
+    	<constructor-arg>
+    		<map>
+    			<entry key="org.springframework.web.client.ResourceAccessException" value="true" />
+    			<entry key="java.net.ConnectException" value="true" />
+    		</map>
+    	</constructor-arg>
+    </bean>
+    
+    
+	<bean id="retryTemplate" class="org.springframework.retry.support.RetryTemplate">
+		<property name="backOffPolicy" ref="fixedBackOffPolicy" />
+		<property name="retryPolicy" ref="retryPolicy" />
+	</bean>
+</beans>
+

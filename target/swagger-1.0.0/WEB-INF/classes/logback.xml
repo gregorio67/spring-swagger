@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xml>
+<configuration scan="true" scanPeriod="60 seconds">
+	<!-- 화면 출력 Appender -->
+	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<charset>UTF-8</charset>
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36}.%M\(%line\) | %msg%n</pattern>
+		</encoder>
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>DEBUG</level>
+		</filter>
+	</appender>
+
+	<!-- 화면 SQL 출력 Appender -->
+	<appender name="console-sql" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<charset>UTF-8</charset>
+			<pattern>-------------------------------------------%n%msg%n</pattern>
+		</encoder>
+	</appender>
+
+    <logger name="com.lgcns.api" level="DEBUG" additivity="false">
+		<appender-ref ref="console" />
+    </logger>
+
+	<!-- 3rd Party -->
+	<!-- Spring Framework logging level -->
+	<logger name="org.springframework.transaction" level="info" additivity="false">
+		<appender-ref ref="console" />
+	</logger>
+
+	<logger name="org.springframework" level="info" additivity="false">
+		<appender-ref ref="console" />
+	</logger>
+
+	<!-- Apache Components logging level -->
+	<logger name="org.apache" level="info" additivity="false">
+		<appender-ref ref="console" />
+	</logger>
+
+	<!-- Apache HttpComponents: 디버깅 -->
+	<logger name="org.apache.http.wire" level="info" additivity="false">
+		<appender-ref ref="console" />
+	</logger>
+
+	<!-- Quartz scheduler logging level -->
+	<logger name="org.quartz" level="info" additivity="false">
+		<appender-ref ref="console" />
+	</logger>
+
+	<!-- MyBatis & SQL -->
+	<!-- SQL base level -->
+	<logger name="java.sql" level="info" additivity="false">
+		<appender-ref ref="console" />
+	</logger>
+	<logger name="org.springframework.jdbc" level="info" additivity="false">
+		<appender-ref ref="console" />
+    </logger>
+
+	<!-- MyBatis logging level -->
+	<logger name="org.mybatis" level="info" additivity="false">
+		<appender-ref ref="console" />
+	</logger>
+
+	<!--
+		JDBC SQL Query Print logging level
+	-->
+	<logger name="jdbc.connection" level="info" additivity="false"> 
+		<appender-ref ref="console-sql" />
+	</logger>
+
+    <logger name="jdbc.resultset" level="info" additivity="false"> 
+        <appender-ref ref="console-sql" />
+    </logger>
+	<logger name="jdbc.audit" level="info" additivity="false"> 
+		<appender-ref ref="console-sql" />
+	</logger>
+	<logger name="jdbc.sqltiming" level="info" additivity="false"> 
+        <appender-ref ref="console-sql" />
+    </logger>
+	<logger name="jdbc.resultsettable" level="info" additivity="false"> <!-- SQL 조회 결과를 확인하고 싶을 경우는 DEBUG로 수정 -->
+		<appender-ref ref="console-sql" />
+	</logger>
+	<logger name="jdbc.sqlonly" level="debug" additivity="false">
+		<!-- DEBUG로 설정되어 있을때만 실행된 SQL이 출력되며 ERROR로 설정시에는 SQL이 출력되지 않는다 -->
+		<appender-ref ref="console-sql" />
+	</logger>
+
+	<root level="ERROR">
+		<appender-ref ref="console" />
+	</root>
+<typeAliases></typeAliases>
+</configuration>
